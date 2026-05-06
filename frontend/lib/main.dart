@@ -216,7 +216,7 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "amount": _amountController.text,
-          "recipient": "Elon Musk"
+          "recipient": "Dilawar"
         }),
       );
 
@@ -294,16 +294,29 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   Widget _buildBar(double height, String label) {
     return Column(
       children: [
-        Container(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutBack,
           width: 30,
           height: height,
           decoration: BoxDecoration(
-            color: Colors.blueAccent,
-            borderRadius: BorderRadius.circular(4),
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.blueAccent, Colors.blue],
+            ),
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 10)),
+        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
       ],
     );
   }
