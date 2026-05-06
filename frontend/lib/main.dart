@@ -19,9 +19,8 @@ class _RevolutCloneState extends State<RevolutClone> {
   List transactions = [];
   bool isLoading = false;
 
-  // IMPORTANT: 
+  // Change this to 'http://127.0.0.1:8000/test' if testing on Windows/Chrome
   // Use 'http://10.0.2.2:8000/test' for Android Emulator
-  // Use 'http://127.0.0.1:8000/test' for Windows Desktop or Web
   final String apiUrl = 'http://127.0.0.1:8000/test'; 
 
   Future<void> fetchData() async {
@@ -29,7 +28,7 @@ class _RevolutCloneState extends State<RevolutClone> {
     try {
       final response = await http.get(Uri.parse(apiUrl));
       
-      if (!mounted) return; // Safety check
+      if (!mounted) return; // Safety check for async gaps
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -43,8 +42,24 @@ class _RevolutCloneState extends State<RevolutClone> {
       if (!mounted) return;
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(content: Text("Error connecting to Python: $e")),
       );
+    }
+  }
+
+  // This is the helper function that was causing the error
+  IconData getIcon(String category) {
+    switch (category) {
+      case 'Entertainment':
+        return Icons.movie;
+      case 'Income':
+        return Icons.work;
+      case 'Coffee':
+        return Icons.coffee;
+      case 'Shopping':
+        return Icons.shopping_cart;
+      default:
+        return Icons.payment;
     }
   }
 
@@ -53,17 +68,14 @@ class _RevolutCloneState extends State<RevolutClone> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
       appBar: AppBar(
-        title: const Text("Home", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text("Home", 
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
-        actions: const [
-          Icon(Icons.help_outline, color: Colors.black),
-          SizedBox(width: 15),
-        ],
       ),
       body: Column(
         children: [
-          // Header Section (Balance)
+          // Balance Header
           Container(
             color: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
@@ -71,16 +83,18 @@ class _RevolutCloneState extends State<RevolutClone> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Euro account", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                const Text("Euro account", 
+                  style: TextStyle(color: Colors.grey, fontSize: 16)),
                 const SizedBox(height: 10),
                 isLoading 
                   ? const CircularProgressIndicator() 
-                  : Text("€$balance", style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+                  : Text("€$balance", 
+                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
 
-          // Action Buttons Section
+          // Action Buttons
           Container(
             color: Colors.white,
             padding: const EdgeInsets.only(bottom: 25),
@@ -96,40 +110,43 @@ class _RevolutCloneState extends State<RevolutClone> {
 
           const SizedBox(height: 20),
 
-          // Transactions Title
+          // Transactions List Title
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text("Transactions", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text("Transactions", 
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
           ),
 
-          // Transactions List
+          // Scrollable List
           Expanded(
             child: transactions.isEmpty 
-              ? const Center(child: Text("Tap 'Add money' to fetch transactions"))
+              ? const Center(child: Text("Tap 'Add money' to see transactions"))
               : ListView.builder(
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
                     final tx = transactions[index];
                     final isPositive = tx['amount'] > 0;
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Color(0xFFE8EAF6),
-                          child: Icon(Icons.shopping_bag, color: Color(0xFF0075FF)),
+                    
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: const Color(0xFFF0F2F5),
+                        child: Icon(
+                          getIcon(tx['category']), // Uses the helper function
+                          color: const Color(0xFF0075FF),
                         ),
-                        title: Text(tx['name'], style: const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: const Text("Payment"),
-                        trailing: Text(
-                          "${isPositive ? '+' : ''}${tx['amount']}",
-                          style: TextStyle(
-                            color: isPositive ? Colors.green : Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16
-                          ),
+                      ),
+                      title: Text(tx['name'], 
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(tx['date'] ?? "Recent"),
+                      trailing: Text(
+                        "${isPositive ? '+' : ''}${tx['amount']}",
+                        style: TextStyle(
+                          color: isPositive ? Colors.green : Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16
                         ),
                       ),
                     );
@@ -141,6 +158,7 @@ class _RevolutCloneState extends State<RevolutClone> {
     );
   }
 
+  // Helper to build the blue circular buttons
   Widget _buildActionBtn(IconData icon, String label, VoidCallback action) {
     return Column(
       children: [
@@ -153,7 +171,7 @@ class _RevolutCloneState extends State<RevolutClone> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
   }

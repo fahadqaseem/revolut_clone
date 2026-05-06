@@ -38,7 +38,7 @@ def hello_revolut():
                 "id": 3,
                 "name": "Starbucks",
                 "amount": -6.50,
-                "category": "Food",
+                "category": "Coffee",
                 "date": "Yesterday"
             },
             {
