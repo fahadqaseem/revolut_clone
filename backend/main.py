@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -12,6 +12,18 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
     allow_headers=["*"],
 )
+
+
+@app.post("/send-money")
+async def send_money(request: Request):
+    data = await request.json()
+    amount = data.get("amount")
+    recipient = data.get("recipient")
+
+    print(f"💰 TRANSACTION RECEIVED: Sending €{amount} to {recipient}")
+
+    # In a real app, you would subtract this from a database here
+    return {"status": "success", "message": f"Sent €{amount} to {recipient}"}
 
 @app.get("/test")
 def hello_revolut():
