@@ -122,8 +122,10 @@ class _RevolutCloneState extends State<RevolutClone> {
 
           // Scrollable List
           Expanded(
+            child: RefreshIndicator(
+              onRefresh: fetchData,
             child: transactions.isEmpty 
-              ? const Center(child: Text("Tap 'Add money' to see transactions"))
+              ? ListView(children: const [Center(child: Padding(padding: EdgeInsets.only(top: 20), child: Text("Pull down to refresh")))])
               : ListView.builder(
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
@@ -153,6 +155,7 @@ class _RevolutCloneState extends State<RevolutClone> {
                   },
                 ),
           ),
+          )
         ],
       ),
     );
