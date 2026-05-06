@@ -195,62 +195,115 @@ class _RevolutCloneState extends State<RevolutClone> {
   }
 }
 
-class SendMoneyScreen extends StatelessWidget {
+class SendMoneyScreen extends StatefulWidget {
   const SendMoneyScreen({super.key});
+
+  @override
+  State<SendMoneyScreen> createState() => _SendMoneyScreenState();
+}
+
+class _SendMoneyScreenState extends State<SendMoneyScreen> {
+  final TextEditingController _amountController = TextEditingController();
+  bool isSending = false;
+
+  Future<void> sendToPython() async {
+    if (_amountController.text.isEmpty) return;
+    
+    setState(() => isSending = true);
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/send-money'), // Windows address
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "amount": _amountController.text,
+          "recipient": "Elon Musk"
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Money Sent Successfully!")),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      setState(() => isSending = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Send Money")),
-      body: Column( // This replaces the "Center" widget
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: Text(
-              "Weekly Spending",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          
-          // The Chart Row
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
+      appBar: AppBar(title: const Text("Transfer")),
+      body: SingleChildScrollView( // Added scroll so keyboard doesn't block the chart
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            // --- THE CHART IS BACK ---
+            const Text("Weekly Spending", 
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end, // Aligns bars to the bottom
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                _buildBar(40, "Mon"),
-                _buildBar(80, "Tue"),
-                _buildBar(60, "Wed"),
-                _buildBar(100, "Thu"),
-                _buildBar(20, "Fri"),
+                _buildBar(40, "M"),
+                _buildBar(80, "T"),
+                _buildBar(60, "W"),
+                _buildBar(100, "T"),
+                _buildBar(20, "F"),
               ],
             ),
-          ),
+            const SizedBox(height: 40),
+            const Divider(),
+            const SizedBox(height: 20),
 
-          const SizedBox(height: 40),
-          
-          const Text("Choose a recipient", style: TextStyle(color: Colors.grey)),
-          // You can add more buttons or a list here later!
-        ],
+            // --- THE SEND MONEY UI ---
+            TextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Amount to Send",
+                prefixText: "€ ",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: isSending ? null : sendToPython,
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: Colors.blue,
+              ),
+              child: isSending 
+                ? const CircularProgressIndicator(color: Colors.white) 
+                : const Text("Confirm Transfer", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // This helper goes INSIDE the SendMoneyScreen class but OUTSIDE the build method
   Widget _buildBar(double height, String label) {
     return Column(
       children: [
         Container(
-          width: 35,
+          width: 30,
           height: height,
           decoration: BoxDecoration(
             color: Colors.blueAccent,
             borderRadius: BorderRadius.circular(4),
           ),
         ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12)),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 10)),
       ],
     );
   }
