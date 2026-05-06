@@ -2,9 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-void main() => runApp(const MaterialApp(
+void main() => runApp( MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: RevolutClone(),
+      // Light Theme
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primaryColor: Colors.blue,
+      ),
+      // Dark Theme
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+      ),
+      themeMode: ThemeMode.system, // Change to ThemeMode.light to test light theme
+      home: const RevolutClone(),
     ));
 
 class RevolutClone extends StatefulWidget {
@@ -102,7 +113,11 @@ class _RevolutCloneState extends State<RevolutClone> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildActionBtn(Icons.add, "Add money", fetchData),
-                _buildActionBtn(Icons.swap_horiz, "Transfer", () {}),
+                _buildActionBtn(Icons.swap_horiz, "Transfer", () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => const SendMoneyScreen()
+                  ));
+                }),
                 _buildActionBtn(Icons.more_horiz, "More", () {}),
               ],
             ),
@@ -171,6 +186,67 @@ class _RevolutCloneState extends State<RevolutClone> {
             radius: 25,
             backgroundColor: const Color(0xFF0075FF),
             child: Icon(icon, color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+}
+
+class SendMoneyScreen extends StatelessWidget {
+  const SendMoneyScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Send Money")),
+      body: Column( // This replaces the "Center" widget
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              "Weekly Spending",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          
+          // The Chart Row
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end, // Aligns bars to the bottom
+              children: [
+                _buildBar(40, "Mon"),
+                _buildBar(80, "Tue"),
+                _buildBar(60, "Wed"),
+                _buildBar(100, "Thu"),
+                _buildBar(20, "Fri"),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 40),
+          
+          const Text("Choose a recipient", style: TextStyle(color: Colors.grey)),
+          // You can add more buttons or a list here later!
+        ],
+      ),
+    );
+  }
+
+  // This helper goes INSIDE the SendMoneyScreen class but OUTSIDE the build method
+  Widget _buildBar(double height, String label) {
+    return Column(
+      children: [
+        Container(
+          width: 35,
+          height: height,
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
         const SizedBox(height: 8),
