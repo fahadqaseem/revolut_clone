@@ -69,6 +69,8 @@ class _RevolutCloneState extends State<RevolutClone> {
         return Icons.coffee;
       case 'Shopping':
         return Icons.shopping_cart;
+        case 'Transfer':
+         return Icons.send;
       default:
         return Icons.payment;
     }
