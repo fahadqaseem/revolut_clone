@@ -18,6 +18,7 @@ def hello_revolut():
     return {
         "status": "online",
         "mock_balance": 5250.75,
+        "spending": [40.0, 80.0, 60.0, 100.0, 20.0],  # New data!
         "currency": "EUR",
         "transactions": [
             {
